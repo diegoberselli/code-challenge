@@ -37,7 +37,6 @@ Este projeto implementa um pipeline de dados utilizando Apache Airflow e Meltano
 - Docker
 - Docker Compose
 - Git
-- Python 3.10 ou superior
 
 ### Passos para Instalação
 
@@ -47,17 +46,12 @@ git clone [url-do-repositorio]
 cd [nome-do-projeto]
 ```
 
-2. Crie os diretórios necessários:
-```bash
-mkdir -p logs plugins data
-```
-
-3. Configure as permissões:
+2. Configure as permissões:
 ```bash
 echo -e "AIRFLOW_UID=$(id -u)\nAIRFLOW_GID=0" > .env
 ```
 
-4. Inicie os serviços (isso irá construir as imagens e instalar todas as dependências definidas no Dockerfile):
+3. Inicie os serviços (isso irá construir as imagens e instalar todas as dependências definidas no Dockerfile):
 ```bash
 docker compose up --build -d
 ```
@@ -159,12 +153,16 @@ docker exec -it code-challenge-postgres-1 psql -U northwind_user -d destination
 SELECT COUNT(*) FROM public.order_details;
 ```
 
-## 📊 Monitoramento
+## 📊 Monitoramento e Acessos
 
-- Interface Airflow: http://localhost:8080
-- PostgreSQL: localhost:5432
+- Airflow UI: http://localhost:8080
+  - Usuário: admin
+  - Senha: admin
+- Banco de Dados: localhost:5432
   - Usuário: northwind_user
   - Senha: thewindisblowing
+  - Database: northwind (source)
+  - Database: destination (target)
 
 ## 🔍 Estrutura de Armazenamento
 
