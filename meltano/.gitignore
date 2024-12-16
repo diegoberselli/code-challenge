@@ -1,0 +1,9 @@
+/.meltano
+/plugins
+/.env
+.env
+/venv
+/.venv
+/output
+/extract
+*.db

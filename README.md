@@ -1,3 +1,195 @@
+# Pipeline de Dados Northwind
+
+Este projeto implementa um pipeline de dados utilizando Apache Airflow e Meltano para extrair, transformar e carregar dados do banco Northwind e arquivos CSV.
+
+## 🚀 Tecnologias Utilizadas
+
+- Apache Airflow 2.10.3
+- Meltano
+- PostgreSQL 13
+- Redis 7.2
+- Docker & Docker Compose
+- Python 3.10
+
+## 📁 Estrutura do Projeto
+
+```
+.
+├── dags/
+│   └── northwind_etl_pipeline.py
+├── data/
+│   ├── init-db.sql
+│   ├── northwind.sql
+│   └── order_details.csv
+├── meltano/
+│   ├── meltano.yml
+│   ├── run_csv.sh
+│   ├── run_postgres.sh
+│   └── to_postgres.sh
+├── docker-compose.yml
+└── Dockerfile
+```
+
+## 🛠️ Configuração e Instalação
+
+### Pré-requisitos
+
+- Docker
+- Docker Compose
+- Git
+- Python 3.10 ou superior
+
+### Passos para Instalação
+
+1. Clone o repositório:
+```bash
+git clone [url-do-repositorio]
+cd [nome-do-projeto]
+```
+
+2. Crie os diretórios necessários:
+```bash
+mkdir -p logs plugins data
+```
+
+3. Configure as permissões:
+```bash
+echo -e "AIRFLOW_UID=$(id -u)\nAIRFLOW_GID=0" > .env
+```
+
+4. Inicie os serviços (isso irá construir as imagens e instalar todas as dependências definidas no Dockerfile):
+```bash
+docker compose up --build -d
+```
+
+O comando acima irá:
+- Construir/reconstruir a imagem do Meltano definida no Dockerfile
+- Baixar todas as imagens necessárias (Airflow, PostgreSQL, Redis)
+- Criar e iniciar todos os containers
+- Configurar a rede e volumes necessários
+
+## 🔄 Pipeline de Dados
+
+O pipeline está configurado para executar diariamente e consiste em três etapas principais:
+
+1. **Extração do PostgreSQL** (`run_postgres.sh`)
+   - Extrai dados das tabelas do banco Northwind
+   - Armazena em formato JSONL
+
+2. **Extração do CSV** (`run_csv.sh`)
+   - Processa o arquivo order_details.csv
+   - Converte para formato JSONL
+
+3. **Carregamento Final** (`to_postgres.sh`)
+   - Carrega os dados processados para o banco de destino
+
+### Configuração do Meltano
+
+Após iniciar os containers, é necessário configurar o ambiente Meltano:
+
+```bash
+# Acessar o container do Meltano
+docker exec -it code-challenge-meltano-1 bash
+
+# Criar ambiente virtual
+python -m venv .venv
+
+# Ativar o ambiente virtual
+source .venv/bin/activate
+
+# Instalar dependências do requirements.txt no ambiente virtual
+pip install -r requirements.txt
+
+# Instalar os plugins definidos no meltano.yml
+meltano install
+
+# Instalar extratores
+meltano install extractor tap-postgres
+meltano install extractor tap-csv
+meltano install extractor tap-singer-jsonl
+
+# Instalar loaders
+meltano install loader target-postgres
+meltano install loader target-jsonl
+
+# Instalar utilitários
+meltano install utility airflow
+```
+
+### Execução do Pipeline
+
+O pipeline completo leva aproximadamente 2-3 minutos para executar, com os seguintes tempos aproximados:
+- run_postgres: ~2 minutos (extração do banco Northwind)
+- run_csv: ~10 segundos (processamento do order_details.csv)
+- load_to_postgres: ~10 segundos (carregamento final dos dados)
+
+O pipeline pode ser executado de duas formas:
+
+### Via Airflow UI
+
+1. Acesse a interface web do Airflow em `http://localhost:8080`
+   - Usuário: admin
+   - Senha: admin
+
+2. Ative e execute a DAG `northwind_etl_pipeline`
+
+![Pipeline Graph View](docs/images/pipeline_graph.png)
+![Pipeline Success](docs/images/pipeline_success.png)
+
+### Via Linha de Comando
+
+Execute os scripts individualmente:
+
+```bash
+docker exec code-challenge-meltano-1 bash -c "source .venv/bin/activate && meltano el [comando-específico]"
+```
+
+## 🔍 Verificação dos Dados
+
+Para verificar os dados carregados no banco de destino:
+
+```bash
+# Acessar o PostgreSQL
+docker exec -it code-challenge-postgres-1 psql -U northwind_user -d destination
+
+# Listar todas as tabelas
+\dt
+
+# Verificar quantidade de registros na tabela order_details
+SELECT COUNT(*) FROM public.order_details;
+```
+
+## 📊 Monitoramento
+
+- Interface Airflow: http://localhost:8080
+- PostgreSQL: localhost:5432
+  - Usuário: northwind_user
+  - Senha: thewindisblowing
+
+## 🔍 Estrutura de Armazenamento
+
+Os dados são armazenados seguindo a estrutura:
+
+```
+/data/postgres/{table}/YYYY-MM-DD/file.format
+/data/csv/YYYY-MM-DD/file.format
+```
+
+## ⚠️ Observações Importantes
+
+- Todos os processos são idempotentes
+- O pipeline suporta reprocessamento de datas passadas
+- As credenciais fornecidas são apenas para desenvolvimento local
+
+## 🤝 Contribuição
+
+1. Faça um Fork do projeto
+2. Crie uma Branch para sua Feature (`git checkout -b feature/AmazingFeature`)
+3. Faça o Commit das suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Faça o Push para a Branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
+
+
 # Indicium Tech Code Challenge
 
 Code challenge for Software Developer with focus in data projects.
@@ -18,7 +210,7 @@ The CSV file represents details of orders from an ecommerce system.
 
 The database provided is a sample database provided by microsoft for education purposes called northwind, the only difference is that the **order_detail** table does not exists in this database you are beeing provided with. This order_details table is represented by the CSV file we provide.
 
-Schema of the original Northwind Database: 
+Schema of the original Northwind Database:
 
 ![image](https://user-images.githubusercontent.com/49417424/105997621-9666b980-608a-11eb-86fd-db6b44ece02a.png)
 
