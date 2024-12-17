@@ -44,7 +44,6 @@ services:
       start_period: 30s
     networks:
       - pipeline_network
-  #retirar isso abaixo se não der boa
   docker-proxy:
     image: alpine/socat
     command: "TCP4-LISTEN:2375,fork,reuseaddr UNIX-CONNECT:/var/run/docker.sock"
@@ -62,7 +61,6 @@ services:
       <<: *airflow-common-env
     user: "${AIRFLOW_UID:-50000}:0"
     entrypoint: /bin/bash
-    # Tirar o  pip install apache-airflow-providers-docker && \
     command:
       - -c
       - |
