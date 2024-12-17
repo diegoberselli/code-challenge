@@ -100,6 +100,7 @@ meltano install
 # Instalar extratores
 meltano install extractor tap-postgres
 meltano install extractor tap-csv
+meltano add extractor tap-singer-jsonl
 meltano install extractor tap-singer-jsonl
 
 # Instalar loaders
