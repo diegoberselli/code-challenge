@@ -46,12 +46,7 @@ git clone [url-do-repositorio]
 cd [nome-do-projeto]
 ```
 
-2. Configure as permissões:
-```bash
-echo -e "AIRFLOW_UID=$(id -u)\nAIRFLOW_GID=0" > .env
-```
-
-3. Inicie os serviços (isso irá construir as imagens e instalar todas as dependências definidas no Dockerfile):
+2. Inicie os serviços:
 ```bash
 docker compose up --build -d
 ```
@@ -128,9 +123,6 @@ O pipeline pode ser executado de duas formas:
 
 2. Ative e execute a DAG `northwind_etl_pipeline`
 
-![Pipeline Graph View](docs/pipeline_graph.png)
-![Pipeline Success](docs/pipeline_success.png)
-
 ### Via Linha de Comando
 
 Execute os scripts individualmente:
@@ -170,8 +162,7 @@ SELECT COUNT(*) FROM public.order_details;
 Os dados são armazenados seguindo a estrutura:
 
 ```
-/data/postgres/{table}/YYYY-MM-DD/file.format
-/data/csv/YYYY-MM-DD/file.format
+/csv-postgres/{table}/YYYY-MM-DD/file.format
 ```
 
 ## ⚠️ Observações Importantes
