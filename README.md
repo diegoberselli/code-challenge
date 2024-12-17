@@ -127,8 +127,8 @@ O pipeline pode ser executado de duas formas:
 
 2. Ative e execute a DAG `northwind_etl_pipeline`
 
-![Pipeline Graph View](docs/images/pipeline_graph.png)
-![Pipeline Success](docs/images/pipeline_success.png)
+![Pipeline Graph View](docs/pipeline_graph.png)
+![Pipeline Success](docs/pipeline_success.png)
 
 ### Via Linha de Comando
 
