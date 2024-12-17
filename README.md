@@ -74,7 +74,45 @@ O pipeline está configurado para executar diariamente e consiste em três etapa
 
 ### Configuração do Meltano
 
-Após iniciar os containers, é necessário configurar o ambiente Meltano:
+Após iniciar os containers, siga os passos abaixo na ordem correta:
+
+#### 1. Configuração do Ambiente Virtual
+
+```bash
+# Acessar o container do Meltano
+docker exec -it code-challenge-meltano-1 bash
+
+# Criar ambiente virtual
+python -m venv .venv
+
+# Ativar o ambiente virtual
+source .venv/bin/activate
+
+# Instalar dependências do requirements.txt
+pip install -r requirements.txt
+```
+
+#### 2. Instalação e Verificação de Plugins
+
+Depois de ativar o ambiente virtual (você deve ver (.venv) no prompt), prossiga com:
+
+```bash
+# Atualizar pip para a versão mais recente
+pip install --upgrade pip
+
+# Atualizar definições de plugins do Meltano
+meltano lock --update --all
+
+# Instalar os plugins necessários
+meltano add extractor tap-postgres
+meltano add extractor tap-csv
+meltano add loader target-postgres
+meltano add loader target-jsonl
+```
+
+> **Nota**: Se você ver mensagens como "Extractor already exists", isso é normal e significa que o plugin já está configurado no seu projeto. Você pode prosseguir para o próximo passo.
+
+> **Nota**: Para mais informações sobre os plugins, você pode visitar o Meltano Hub (exemplo: https://hub.meltano.com/extractors/tap-csv--meltanolabs).
 
 ```bash
 # Acessar o container do Meltano
