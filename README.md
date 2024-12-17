@@ -74,10 +74,9 @@ O pipeline está configurado para executar diariamente e consiste em três etapa
 
 ### Configuração do Meltano
 
-Após iniciar os containers, siga os passos abaixo na ordem correta:
+Siga os passos abaixo na ordem correta:
 
 #### 1. Configuração do Ambiente Virtual
-
 ```bash
 # Acessar o container do Meltano
 docker exec -it code-challenge-meltano-1 bash
@@ -90,44 +89,17 @@ source .venv/bin/activate
 
 # Instalar dependências do requirements.txt
 pip install -r requirements.txt
-```
 
-#### 2. Instalação e Verificação de Plugins
-
-Depois de ativar o ambiente virtual (você deve ver (.venv) no prompt), prossiga com:
-
-```bash
 # Atualizar pip para a versão mais recente
 pip install --upgrade pip
+```
 
+#### 2. Instalação e Configuração dos Plugins
+```bash
 # Atualizar definições de plugins do Meltano
 meltano lock --update --all
 
-# Instalar os plugins necessários
-meltano add extractor tap-postgres
-meltano add extractor tap-csv
-meltano add loader target-postgres
-meltano add loader target-jsonl
-```
-
-> **Nota**: Se você ver mensagens como "Extractor already exists", isso é normal e significa que o plugin já está configurado no seu projeto. Você pode prosseguir para o próximo passo.
-
-> **Nota**: Para mais informações sobre os plugins, você pode visitar o Meltano Hub (exemplo: https://hub.meltano.com/extractors/tap-csv--meltanolabs).
-
-```bash
-# Acessar o container do Meltano
-docker exec -it code-challenge-meltano-1 bash
-
-# Criar ambiente virtual
-python -m venv .venv
-
-# Ativar o ambiente virtual
-source .venv/bin/activate
-
-# Instalar dependências do requirements.txt no ambiente virtual
-pip install -r requirements.txt
-
-# Instalar os plugins definidos no meltano.yml
+# Instalar plugins base e definidos no meltano.yml
 meltano install
 
 # Instalar extratores
@@ -143,6 +115,10 @@ meltano install loader target-jsonl
 # Instalar utilitários
 meltano install utility airflow
 ```
+
+> **Nota**: Se você ver mensagens como "Extractor already exists", isso é normal e significa que o plugin já está configurado no seu projeto. Você pode prosseguir para o próximo passo.
+
+> **Nota**: Para mais informações sobre os plugins, você pode visitar o Meltano Hub (exemplo: https://hub.meltano.com/extractors/tap-csv--meltanolabs).
 
 ### Execução do Pipeline
 
@@ -203,7 +179,30 @@ Os dados são armazenados seguindo a estrutura:
 /csv-postgres/{table}/YYYY-MM-DD/file.format
 ```
 
-## ⚠️ Observações Importantes
+## ⚠️ Troubleshooting
+
+### Erros Comuns
+
+1. **Erro de Chave Duplicada (state_pkey)**
+   ```
+   duplicate key value violates unique constraint "state_pkey"
+   ```
+   Solução: Limpe o estado anterior da execução:
+   ```bash
+   # Acessar o banco de dados
+   docker exec -it code-challenge-postgres-1 psql -U northwind_user -d northwind
+
+   # Limpar a tabela de estados
+   DELETE FROM state;
+   ```
+
+2. **Erros de Tipos de Dados**
+   ```
+   Did not recognize type 'bpchar'
+   ```
+   Este é um aviso normal para colunas char(n) do PostgreSQL e pode ser ignorado.
+
+### Observações Importantes
 
 - Todos os processos são idempotentes
 - O pipeline suporta reprocessamento de datas passadas
@@ -216,7 +215,6 @@ Os dados são armazenados seguindo a estrutura:
 3. Faça o Commit das suas mudanças (`git commit -m 'Add some AmazingFeature'`)
 4. Faça o Push para a Branch (`git push origin feature/AmazingFeature`)
 5. Abra um Pull Request
-
 
 # Indicium Tech Code Challenge
 
